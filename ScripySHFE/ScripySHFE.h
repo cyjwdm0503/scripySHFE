@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cstdio>
+#include <cstdlib>
+#include "utf8togb2312.h"
 using namespace  std;
 using namespace  Ryeol;
 class CSHFE
@@ -38,6 +41,88 @@ public:
 
 		//m_objHttpReq.
 		m_pobjHttpRes = NULL;
+
+	}
+
+	string GetArticleDate(string str)
+	{
+		//str  = Utf8ToAscii(str);
+		string date = "";
+		size_t date_begin = str.find("发布日期：");
+		size_t length = string("发布日期：").length();
+		if(date_begin != string::npos)
+		{
+			date = str.substr(date_begin+length,10);
+			int year = 0,month=0,day=0;
+			sscanf(date.c_str(),"%04d-%02d-%02d",&year,&month,&day);
+			char date_buf[9];
+			sprintf(date_buf,"%04d%02d%02d",year,month,day);
+			cout<<date_buf<<endl;
+			date =  date_buf;
+			cout<<date<<endl;
+		}
+		return date;
+	}
+	string GetHref(string filename,int index)
+	{
+		FILE* file = fopen(filename.c_str(),"r");
+		int  t_index= -1;
+		string href = "";
+		if(file != NULL)
+		{
+			char buf[1024];
+			while(fscanf(file,"%s\n",buf) !=EOF)
+			{
+				href = buf;
+				t_index++;
+				if(t_index == index)
+				{
+					cout<<href<<endl;
+					return href;
+				}
+			}
+			fclose(file);
+		}
+		return href;
+	}
+	void ReqSHFENotice(string str,string find_word="")
+	{
+		m_pobjHttpRes  = m_objHttpReq.RequestGet(str.c_str());
+		int length;
+		if(m_pobjHttpRes != NULL)
+		{
+			char* content =  new char[1024*1000];
+			length= m_pobjHttpRes->ReadContent((BYTE*)content,1024*1000);
+			if(length >1000)
+			{
+				string str = content;
+				size_t begin_article = str.find("<div class=\"article-detail-text\">");
+				if(begin_article == string::npos)
+					return;
+				string sub_article = str.substr(begin_article,str.length()-begin_article);
+				size_t end_article = sub_article.find("<div class=\"clearfix\"");
+				if(begin_article != string::npos && end_article !=string::npos)
+				{
+					string article = sub_article.substr(0,end_article-1);
+					article = Utf8ToAscii(article);
+					if(article.find(find_word) == string::npos && find_word != "")
+					{
+						return;
+					}
+					ofstream file1;
+					string file_name = GetArticleDate(article);
+					file_name +=".html";
+					file1.open(file_name.c_str(),ios::out|ios::app|ios::ate);
+					file1<<article;
+					file1.flush();
+					file1.close();
+				}
+
+			}
+			if(content != NULL)
+				delete [] content;
+			content = NULL;
+		}
 
 	}
 	void ReqSHFE(int index)
@@ -79,6 +164,9 @@ public:
 				}
 
 			}
+			if(content != NULL)
+				delete [] content;
+			content = NULL;
 		}
 
 	}

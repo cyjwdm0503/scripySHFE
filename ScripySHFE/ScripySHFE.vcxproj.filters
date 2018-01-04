@@ -24,6 +24,9 @@
     <ClCompile Include="ScripySHFE.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="utf8togb2312.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ryeolhttpclient_src\RyeolException.h">
@@ -36,6 +39,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ScripySHFE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8togb2312.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
